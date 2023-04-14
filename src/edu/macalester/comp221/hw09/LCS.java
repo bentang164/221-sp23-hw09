@@ -7,7 +7,7 @@ public class LCS {
     private final String STR_1 = "GCTACTCTCCTCATAAGCAGTCCGGTGTAT";
     private final String STR_2 = "CGAAAGAACAAGACTAGCCTTGCTAGCAACCGCGG";
 
-    private List<List<String>> matrix;
+    private List<List<List<String>>> matrix;
     private List<Character> strOneList;
     private List<Character> strTwoList;
 
@@ -28,16 +28,19 @@ public class LCS {
         }
 
         for (int i = 0; i < strOneList.size(); i++) {
-            // lateral, outer
-            List<String> outerList = new ArrayList<>();
-            outerList.add("");
+            List<List<String>> outerList = new ArrayList<>();
+            
+            for (int j = 0; j < strTwoList.size(); j++) {
+                List<String> charAtIndex = new ArrayList<>();
+
+                if (i == 0 || j == 0) {
+                    charAtIndex.add("");
+                }
+
+                outerList.add(charAtIndex);
+            }
 
             matrix.add(outerList);
-        }
-
-        for (int i = 0; i < strTwoList.size(); i++) {
-            // lateral, inner
-            matrix.get(0).add("");
         }
     }
 
@@ -45,36 +48,55 @@ public class LCS {
         for (int charSR1 = 1; charSR1 < strOneList.size(); charSR1++) {
             for (int charSR2 = 1; charSR2 < strTwoList.size(); charSR2++) {
                 if (strOneList.get(charSR1) == strTwoList.get(charSR2)) {
-                    String diag = matrix.get(charSR1-1).get(charSR2-1);
-                    diag += strOneList.get(charSR1);
-                            // Matched character
+                    List<String> diag = matrix.get(charSR1-1).get(charSR2-1);
 
-                    matrix.get(charSR1).add(diag);
+                    for (String character : diag) {
+                        matrix.get(charSR1).get(charSR2).add(character + strOneList.get(charSR1));
+                    }
                 } else {
-                    String upper = matrix.get(charSR1).get(charSR2 - 1);
-                    String left = matrix.get(charSR1-1).get(charSR2);
-                    String diag = matrix.get(charSR1-1).get(charSR2-1);
+                    List<String> upper = matrix.get(charSR1).get(charSR2 - 1);
+                    List<String> left = matrix.get(charSR1-1).get(charSR2);
+                    List<String> diag = matrix.get(charSR1-1).get(charSR2-1);
 
-                    // Find the longest substring
-                    int max = upper.length();
-                    max = Math.max(max, left.length());
-                    final int maximum = Math.max(max, diag.length());
-
-                    List<String> largestString = new ArrayList<>();
-                    largestString.add(upper);
-                    largestString.add(left);
-                    largestString.add(diag);
-
-                    largestString.removeIf(x -> {
-                        return x.length() != maximum;
-                    });
-
-                    matrix.get(charSR1).add(largestString.get(0));
+                    matrix.get(charSR1).get(charSR2).addAll(findLongest(upper, left, diag));
                 }
             }
+            
         }
 
         System.out.println(matrix.get(strOneList.size() - 1).get(strTwoList.size() - 1));
+    }
+
+    private List<String> findLongest(List<String> upper, List<String> left, List<String> diag) {
+        List<String> allSubstrings = new ArrayList<>();
+
+        addNoDuplicates(allSubstrings, upper);
+        addNoDuplicates(allSubstrings, left);
+        addNoDuplicates(allSubstrings, diag);
+
+        int max = allSubstrings.get(0).length();
+
+        for (String substring : allSubstrings) {
+            max = Math.max(max, substring.length());
+        }
+
+        final int maximum = max;
+
+
+
+        allSubstrings.removeIf(x -> {
+            return x.length() != maximum;
+        });
+
+        return allSubstrings;
+    }
+
+    private void addNoDuplicates (List<String> target, List<String> source) {
+        for (String element : source) {
+            if (!target.contains(element)) {
+                target.add(element);
+            }
+        }
     }
 
     public static void main(String[] args) {
@@ -82,8 +104,8 @@ public class LCS {
 
         l.longestCommonSubsequence();
 
-        for (List<String> inner : l.matrix) {
-            System.out.println(inner);
-        }
+        // for (List<List<String>> inner : l.matrix) {
+        //     System.out.println(inner);
+        // }
     }
 }
