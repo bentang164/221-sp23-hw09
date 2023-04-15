@@ -103,9 +103,5 @@ public class LCS {
         LCS l = new LCS();
 
         l.longestCommonSubsequence();
-
-        // for (List<List<String>> inner : l.matrix) {
-        //     System.out.println(inner);
-        // }
     }
 }
