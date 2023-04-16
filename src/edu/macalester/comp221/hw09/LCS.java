@@ -82,8 +82,6 @@ public class LCS {
 
         final int maximum = max;
 
-
-
         allSubstrings.removeIf(x -> {
             return x.length() != maximum;
         });
